@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf5ff">
+  <title>Rainbow Meadow · Multiplication magic</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="index.html"><span>🌈</span> Rainbow Meadow</a><span class="header-note">A little practice. A lot of magic.</span></header>
+  <main>
+    <div class="intro"><span class="eyebrow">✨ MULTIPLICATION MAGIC</span><h1><span>Let’s make magic!</span></h1><p>Multiply. Collect stars. Make friends! 🦄 🐶</p></div>
+    <section class="game-layout" aria-label="Multiplication game">
+      <aside class="friends-card"><div class="scene"><span class="cloud cloud-one">☁</span><span class="cloud cloud-two">☁</span><span class="sparkle s1">✦</span><span class="sparkle s2">✧</span><div class="rainbow">🌈</div><div class="friends">🦄<span>🐶</span></div><div class="flowers">🌼 🌿 🌸 🌿 🌼</div></div><div class="friends-copy"><span class="eyebrow">YOUR MAGIC FRIENDS</span><h2>Luna &amp; Pip</h2><p id="cheer">“Let’s play!”</p></div><div class="tip"><span>💜</span><p>Take your time. Every try helps your brain grow!</p></div></aside>
+      <div class="play-card">
+        <div class="card-top"><span class="pill">⭐ <span id="star-count">0</span> stars</span><button class="text-button" id="restart">Restart ↻</button></div>
+        <div class="settings"><label for="table">Let’s practise</label><select id="table"><option value="mixed">All tables · 1–9</option><option value="2">2 times table</option><option value="3">3 times table</option><option value="4">4 times table</option><option value="5">5 times table</option><option value="6">6 times table</option><option value="7">7 times table</option><option value="8">8 times table</option><option value="9">9 times table</option><option value="1">1 times table</option></select></div>
+        <div class="progress-label"><span>Your star trail</span><span id="progress-text">0 / 10</span></div><div class="trail" id="trail" aria-label="0 of 10 stars"></div>
+        <div id="question-area"><p class="question-label">✨ YOUR TURN!</p><div class="equation"><span id="first">2</span><span class="operator">×</span><span id="second">3</span><span class="operator">=</span><span class="question-mark">?</span></div>
+        <form id="answer-form"><label class="sr-only" for="answer">Your answer</label><input id="answer" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="Your answer" aria-describedby="feedback"><button class="primary" id="check" type="submit">Check <span>✨</span></button></form>
+        <button id="hint-button" class="hint-button">💡 Hint</button><div id="hint" hidden></div></div>
+        <div id="feedback" role="status" aria-live="polite">You’ve got this! Let’s collect your first star.</div><button id="next" class="primary" hidden>Next →</button>
+        <div id="celebration" hidden><div class="celebration-icon">🏆🦄🐶</div><h2>You’re a star!</h2><p>10 stars! Hooray! 🎉</p><button class="primary" id="again">Play again ✨</button></div>
+      </div>
+    </section>
+    <div class="footer-notes"><span>🌱 Grow at your own pace</span><span>🧠 Practice makes progress</span><span>💫 Mistakes are welcome here</span></div>
+  </main><footer>Made for curious minds &amp; magical moments.</footer>
+</body>
+</html>
