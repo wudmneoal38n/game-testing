@@ -3,6 +3,39 @@
   const $ = id => document.getElementById(id);
   let stars = 0, first = 2, second = 3, solved = false, bag = [], previous = '';
   const cheers = ['“A sparkling star! You did it!”', '“Pip is doing a happy tail wag!”', '“Your brain is getting stronger!”', '“High hoof! That was magical!”'];
+  const timers = new Map();
+  function animate(id, action) {
+    const friend = $(id);
+    clearTimeout(timers.get(id));
+    friend.classList.remove('dance', 'nuzzle');
+    void friend.offsetWidth;
+    friend.classList.add(action);
+    timers.set(id, setTimeout(() => friend.classList.remove(action), 1400));
+  }
+  function magic(symbols) {
+    const pieces = Array.from({length:8}, (_, i) => {
+      const piece = document.createElement('span');
+      piece.className = 'magic-piece';
+      piece.textContent = symbols[i % symbols.length];
+      piece.style.setProperty('--left', `${8 + i * 11}%`);
+      piece.style.animationDelay = `${i * 70}ms`;
+      return piece;
+    });
+    $('magic').replaceChildren(...pieces);
+    setTimeout(() => pieces.forEach(piece => piece.remove()), 2300);
+  }
+  function highFive() {
+    animate('luna', 'dance'); magic(['✨', '🌈', '💜']);
+    $('cheer').textContent = '“High hoof! You’re magical!”';
+  }
+  function petPip() {
+    animate('pip', 'nuzzle'); magic(['💕', '🐾', '💛']);
+    $('cheer').textContent = '“Woof! More cuddles, please!”';
+  }
+  $('luna').addEventListener('click', highFive);
+  $('high-five').addEventListener('click', highFive);
+  $('pip').addEventListener('click', petPip);
+  $('pet').addEventListener('click', petPip);
   function makeBag() {
     const selected = $('table').value;
     bag = [];
@@ -35,6 +68,8 @@
     $('answer').focus();
   }
   function reset() {
+    document.querySelector('.scene').classList.remove('party');
+    $('magic').replaceChildren();
     stars = 0; bag = []; progress();
     $('question-area').hidden = false; $('celebration').hidden = true; $('feedback').hidden = false;
     $('cheer').textContent = '“Let’s play!”';
@@ -49,14 +84,19 @@
       $('feedback').className = 'retry'; return;
     }
     if (Number(value) !== first * second) {
+      animate('pip', 'nuzzle');
+      $('cheer').textContent = '“Woof! Let’s try together!”';
       $('feedback').textContent = 'Try again 💜 Need a hint?';
       $('feedback').className = 'retry'; $('answer').select(); return;
     }
     solved = true; stars++; progress();
+    animate('luna', 'dance'); animate('pip', 'dance'); magic(['⭐', '✨', '💖']);
     $('answer').disabled = true; $('check').disabled = true; $('hint-button').hidden = true; $('hint').hidden = true;
     $('feedback').textContent = `Yes! ${first} × ${second} = ${first * second}. A star for you! ⭐`;
     $('feedback').className = 'success'; $('cheer').textContent = cheers[(stars - 1) % cheers.length];
     if (stars === 10) {
+      document.querySelector('.scene').classList.add('party');
+      $('cheer').textContent = '“You did it! Party time!”';
       $('question-area').hidden = true; $('celebration').hidden = false; $('again').focus();
     } else { $('next').hidden = false; $('next').focus(); }
   });
