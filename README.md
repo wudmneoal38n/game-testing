@@ -1,6 +1,6 @@
 # Rainbow Meadow
 
-A gentle multiplication game for children, with Luna the unicorn and Pip the fluffy pup. Practise single digit multiplication (1–9), choose a times table, see groups-of-dots hints, and collect ten stars. Incorrect answers can be retried without a penalty or timer.
+A gentle multiplication game for children, with Luna the unicorn and Pip the fluffy pup. Practise single digit multiplication (1–9), choose a times table, pick Luna or Pip, and tap one of three answer hoops to make your friend jump through it. Use groups-of-dots hints and collect ten stars. Incorrect answers can be retried without a penalty or timer.
 
 Open `index.html` in a browser, or serve the folder:
 

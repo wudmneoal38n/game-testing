@@ -19,7 +19,9 @@
         <div class="settings"><label for="table">Let’s practise</label><select id="table"><option value="mixed">All tables · 1–9</option><option value="2">2 times table</option><option value="3">3 times table</option><option value="4">4 times table</option><option value="5">5 times table</option><option value="6">6 times table</option><option value="7">7 times table</option><option value="8">8 times table</option><option value="9">9 times table</option><option value="1">1 times table</option></select></div>
         <div class="progress-label"><span>Your star trail</span><span id="progress-text">0 / 10</span></div><div class="trail" id="trail" aria-label="0 of 10 stars"></div>
         <div id="question-area"><p class="question-label">✨ YOUR TURN!</p><div class="equation"><span id="first">2</span><span class="operator">×</span><span id="second">3</span><span class="operator">=</span><span class="question-mark">?</span></div>
-        <form id="answer-form"><label class="sr-only" for="answer">Your answer</label><input id="answer" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="Your answer" aria-describedby="feedback"><button class="primary" id="check" type="submit">Check <span>✨</span></button></form>
+        <div class="jumper-picker" role="group" aria-label="Choose your jumping friend"><button id="choose-luna" aria-pressed="true">🦄 Luna</button><button id="choose-pip" aria-pressed="false">🐶 Pip</button></div>
+        <p class="jump-instruction">Tap an answer to jump!</p>
+        <div id="jump-arena"><div id="answer-choices" role="group" aria-label="Answer choices"></div><span id="jumper" aria-hidden="true">🦄</span></div>
         <button id="hint-button" class="hint-button">💡 Hint</button><div id="hint" hidden></div></div>
         <div id="feedback" role="status" aria-live="polite">You’ve got this! Let’s collect your first star.</div><button id="next" class="primary" hidden>Next →</button>
         <div id="celebration" hidden><div class="celebration-icon">🏆🦄🐶</div><h2>You’re a star!</h2><p>10 stars! Hooray! 🎉</p><button class="primary" id="again">Play again ✨</button></div>

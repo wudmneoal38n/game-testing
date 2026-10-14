@@ -4,6 +4,61 @@
   let stars = 0, first = 2, second = 3, solved = false, bag = [], previous = '';
   const cheers = ['“A sparkling star! You did it!”', '“Pip is doing a happy tail wag!”', '“Your brain is getting stronger!”', '“High hoof! That was magical!”'];
   const timers = new Map();
+  let chosenFriend = 'luna', jumping = false, roundVersion = 0;
+  let flight;
+  for (const name of ['luna', 'pip']) {
+    $('choose-' + name).addEventListener('click', () => {
+      if (jumping) return;
+      chosenFriend = name;
+      $('jumper').textContent = name === 'luna' ? '🦄' : '🐶';
+      for (const other of ['luna', 'pip']) $('choose-' + other).setAttribute('aria-pressed', String(other === name));
+    });
+  }
+  function choices() {
+    const correct = first * second;
+    const values = new Set([correct]);
+    while (values.size < 3) values.add(1 + Math.floor(Math.random() * 81));
+    const answers = [...values];
+    for (let i = answers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [answers[i], answers[j]] = [answers[j], answers[i]];
+    }
+    $('answer-choices').replaceChildren(...answers.map(value => {
+      const button = document.createElement('button');
+      button.className = 'answer-hoop'; button.textContent = value;
+      button.setAttribute('aria-label', `Jump through ${value}`);
+      button.addEventListener('click', () => jumpAnswer(value, button));
+      return button;
+    }));
+  }
+  async function jumpAnswer(value, button) {
+    if (solved || jumping) return;
+    jumping = true;
+    const version = roundVersion;
+    const buttons = [...document.querySelectorAll('.answer-hoop')];
+    buttons.forEach(choice => choice.disabled = true);
+    const avatar = $('jumper');
+    const origin = avatar.getBoundingClientRect(), target = button.getBoundingClientRect();
+    const x = target.left + target.width / 2 - origin.left - origin.width / 2;
+    const y = target.top + target.height / 2 - origin.top - origin.height / 2;
+    button.classList.add('selected');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    flight = avatar.animate([{transform:'translate(0,0) scale(1)'},{transform:`translate(${x*.5}px, ${y-45}px) scale(1.15)`,offset:.5},{transform:`translate(${x}px, ${y}px) scale(.65)`}], {duration:reduced?0:850, easing:'ease-in-out',fill:'forwards'});
+    try { await flight.finished; } catch { return; }
+    if (version !== roundVersion) return;
+    flight.cancel(); jumping = false;
+    if (value !== first * second) {
+      button.classList.add('miss'); button.disabled = true;
+      buttons.filter(choice => !choice.classList.contains('miss')).forEach(choice => choice.disabled = false);
+      animate(chosenFriend, 'nuzzle');
+      $('cheer').textContent = '“Let’s try another hoop!”';
+      $('feedback').textContent = 'Try another hoop 💜'; $('feedback').className = 'retry';
+      buttons.find(choice => !choice.disabled)?.focus();
+      return;
+    }
+    button.classList.add('correct');
+    awardStar();
+  }
   function animate(id, action) {
     const friend = $(id);
     clearTimeout(timers.get(id));
@@ -59,13 +114,14 @@
     }));
   }
   function question() {
+    roundVersion++; flight?.cancel(); jumping = false;
     if (!bag.length) makeBag();
     [first, second] = bag.pop(); previous = `${first},${second}`; solved = false;
     $('first').textContent = first; $('second').textContent = second;
-    $('answer').value = ''; $('answer').disabled = false; $('check').disabled = false;
+    choices();
     $('next').hidden = true; $('hint').hidden = true; $('hint-button').hidden = false;
     $('feedback').className = ''; $('feedback').textContent = 'You’ve got this! 💜';
-    $('answer').focus();
+    document.querySelector('.answer-hoop').focus();
   }
   function reset() {
     document.querySelector('.scene').classList.remove('party');
@@ -75,23 +131,10 @@
     $('cheer').textContent = '“Let’s play!”';
     question();
   }
-  $('answer-form').addEventListener('submit', event => {
-    event.preventDefault();
-    if (solved) return;
-    const value = $('answer').value.trim();
-    if (!/^\d{1,2}$/.test(value)) {
-      $('feedback').textContent = 'Type a number ✏️';
-      $('feedback').className = 'retry'; return;
-    }
-    if (Number(value) !== first * second) {
-      animate('pip', 'nuzzle');
-      $('cheer').textContent = '“Woof! Let’s try together!”';
-      $('feedback').textContent = 'Try again 💜 Need a hint?';
-      $('feedback').className = 'retry'; $('answer').select(); return;
-    }
+  function awardStar() {
     solved = true; stars++; progress();
     animate('luna', 'dance'); animate('pip', 'dance'); magic(['⭐', '✨', '💖']);
-    $('answer').disabled = true; $('check').disabled = true; $('hint-button').hidden = true; $('hint').hidden = true;
+    $('hint-button').hidden = true; $('hint').hidden = true;
     $('feedback').textContent = `Yes! ${first} × ${second} = ${first * second}. A star for you! ⭐`;
     $('feedback').className = 'success'; $('cheer').textContent = cheers[(stars - 1) % cheers.length];
     if (stars === 10) {
@@ -99,7 +142,7 @@
       $('cheer').textContent = '“You did it! Party time!”';
       $('question-area').hidden = true; $('celebration').hidden = false; $('again').focus();
     } else { $('next').hidden = false; $('next').focus(); }
-  });
+  }
   $('hint-button').addEventListener('click', () => {
     const hint = $('hint'); hint.hidden = !hint.hidden;
     if (hint.hidden) return;
