@@ -10,7 +10,7 @@
     $('choose-' + name).addEventListener('click', () => {
       if (jumping) return;
       chosenFriend = name;
-      $('jumper').textContent = name === 'luna' ? '🦄' : '🐶';
+      $('jumper').src = `assets/${name}.svg`;
       for (const other of ['luna', 'pip']) $('choose-' + other).setAttribute('aria-pressed', String(other === name));
     });
   }
@@ -47,10 +47,11 @@
     $('feedback').textContent = `${chosenFriend === 'luna' ? 'Luna' : 'Pip'} is jumping through ${value}!`;
     flight = avatar.animate([
       {transform:'translate(0,0) scale(1)'},
-      {transform:`translate(${x * .4}px, ${y - 18}px) scale(1.1)`,offset:.35},
-      {transform:`translate(${x}px, ${y}px) scale(.85)`,offset:.65},
+      {transform:`translate(${x * .4}px, ${y - 8}px) scale(1.1)`,offset:.3},
+      {transform:`translate(${x}px, ${y}px) scale(.65)`,offset:.55},
+      {transform:`translate(${x}px, ${y}px) scale(.65)`,offset:.7},
       {transform:`translate(${x}px, 0px) scale(1)`,offset:1}
-    ], {duration:reduced?0:1200, easing:'ease-in-out',fill:'forwards'});
+    ], {duration:reduced?350:1800, easing:'ease-in-out',fill:'forwards'});
     try { await flight.finished; } catch { return; }
     if (version !== roundVersion) return;
     jumping = false;
