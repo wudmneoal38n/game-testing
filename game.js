@@ -5,7 +5,7 @@
   const cheers = ['“A sparkling star! You did it!”', '“Pip is doing a happy tail wag!”', '“Your brain is getting stronger!”', '“High hoof! That was magical!”'];
   const timers = new Map();
   let chosenFriend = 'luna', jumping = false, roundVersion = 0;
-  let flight;
+  let flight, advanceTimer;
   for (const name of ['luna', 'pip']) {
     $('choose-' + name).addEventListener('click', () => {
       if (jumping) return;
@@ -33,6 +33,7 @@
   }
   async function jumpAnswer(value, button) {
     if (solved || jumping) return;
+    flight?.cancel();
     jumping = true;
     const version = roundVersion;
     const buttons = [...document.querySelectorAll('.answer-hoop')];
@@ -43,10 +44,16 @@
     const y = target.top + target.height / 2 - origin.top - origin.height / 2;
     button.classList.add('selected');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    flight = avatar.animate([{transform:'translate(0,0) scale(1)'},{transform:`translate(${x*.5}px, ${y-45}px) scale(1.15)`,offset:.5},{transform:`translate(${x}px, ${y}px) scale(.65)`}], {duration:reduced?0:850, easing:'ease-in-out',fill:'forwards'});
+    $('feedback').textContent = `${chosenFriend === 'luna' ? 'Luna' : 'Pip'} is jumping through ${value}!`;
+    flight = avatar.animate([
+      {transform:'translate(0,0) scale(1)'},
+      {transform:`translate(${x * .4}px, ${y - 18}px) scale(1.1)`,offset:.35},
+      {transform:`translate(${x}px, ${y}px) scale(.85)`,offset:.65},
+      {transform:`translate(${x}px, 0px) scale(1)`,offset:1}
+    ], {duration:reduced?0:1200, easing:'ease-in-out',fill:'forwards'});
     try { await flight.finished; } catch { return; }
     if (version !== roundVersion) return;
-    flight.cancel(); jumping = false;
+    jumping = false;
     if (value !== first * second) {
       button.classList.add('miss'); button.disabled = true;
       buttons.filter(choice => !choice.classList.contains('miss')).forEach(choice => choice.disabled = false);
@@ -114,12 +121,12 @@
     }));
   }
   function question() {
-    roundVersion++; flight?.cancel(); jumping = false;
+    roundVersion++; clearTimeout(advanceTimer); flight?.cancel(); jumping = false;
     if (!bag.length) makeBag();
     [first, second] = bag.pop(); previous = `${first},${second}`; solved = false;
     $('first').textContent = first; $('second').textContent = second;
     choices();
-    $('next').hidden = true; $('hint').hidden = true; $('hint-button').hidden = false;
+    $('hint').hidden = true; $('hint-button').hidden = false;
     $('feedback').className = ''; $('feedback').textContent = 'You’ve got this! 💜';
     document.querySelector('.answer-hoop').focus();
   }
@@ -141,7 +148,10 @@
       document.querySelector('.scene').classList.add('party');
       $('cheer').textContent = '“You did it! Party time!”';
       $('question-area').hidden = true; $('celebration').hidden = false; $('again').focus();
-    } else { $('next').hidden = false; $('next').focus(); }
+    } else {
+      const version = roundVersion;
+      advanceTimer = setTimeout(() => { if (version === roundVersion) question(); }, 1000);
+    }
   }
   $('hint-button').addEventListener('click', () => {
     const hint = $('hint'); hint.hidden = !hint.hidden;
@@ -155,7 +165,6 @@
     }
     hint.append(text, groups);
   });
-  $('next').addEventListener('click', question);
   $('restart').addEventListener('click', reset);
   $('again').addEventListener('click', reset);
   $('table').addEventListener('change', () => { bag = []; if (stars === 10) reset(); else question(); });
