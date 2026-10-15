@@ -1,4 +1,4 @@
-import {createMeadow} from './meadow.js';
+import {createMeadow} from './meadow.js?v=fullscreen1';
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -6,7 +6,7 @@ import {createMeadow} from './meadow.js';
   const cheers = ['“A sparkling star! You did it!”', '“Pip is doing a happy tail wag!”', '“Your brain is getting stronger!”', '“High hoof! That was magical!”'];
   const timers = new Map();
   const meadow = createMeadow($('jump-arena'));
-  if (meadow) $('jump-arena').classList.add('three-d');
+  if (meadow) { $('jump-arena').classList.add('three-d'); document.body.classList.add('immersive'); }
   let lane = 1;
   function selectLane(index) {
     lane = Math.max(0, Math.min(2,index));
@@ -21,6 +21,7 @@ import {createMeadow} from './meadow.js';
   document.addEventListener('keydown',event=>{
     if ($('question-area').hidden || event.target.tagName === 'SELECT' || event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.key==='ArrowLeft' || event.key==='ArrowRight') {event.preventDefault();move(event.key==='ArrowLeft'?-1:1);}
+    if (event.key==='ArrowUp') {event.preventDefault();if(!event.repeat)jumpSelected();}
     if ((event.code==='Space'||event.key==='Enter') && (event.target===document.body || event.target.closest('#jump-arena, .movement-controls'))) {event.preventDefault();if(!event.repeat)jumpSelected();}
   });
   let chosenFriend = 'luna', jumping = false, roundVersion = 0;

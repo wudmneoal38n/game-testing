@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#faf5ff">
   <title>Rainbow Meadow · Multiplication magic</title>
-  <link rel="stylesheet" href="style.css?v=3d1">
-  <script type="module" src="game.js?v=3d1"></script>
+  <link rel="stylesheet" href="style.css?v=fullscreen1">
+  <script type="module" src="game.js?v=fullscreen1"></script>
 </head>
 <body>
   <header><a class="brand" href="index.html"><span>🌈</span> Rainbow Meadow</a><span class="header-note">A little practice. A lot of magic.</span></header>
@@ -20,9 +20,9 @@
         <div class="progress-label"><span>Your star trail</span><span id="progress-text">0 / 10</span></div><div class="trail" id="trail" aria-label="0 of 10 stars"></div>
         <div id="question-area"><p class="question-label">✨ YOUR TURN!</p><div class="equation"><span id="first">2</span><span class="operator">×</span><span id="second">3</span><span class="operator">=</span><span class="question-mark">?</span></div>
         <div class="jumper-picker" role="group" aria-label="Choose your jumping friend"><button id="choose-luna" aria-pressed="true">🦄 Luna</button><button id="choose-pip" aria-pressed="false">🐶 Pip</button></div>
-        <p class="jump-instruction">← → Move · Space to jump!</p>
-        <div id="jump-arena" tabindex="0" aria-label="Use left and right arrow keys to move. Space or Enter to jump."><div id="answer-choices" role="group" aria-label="Answer choices"></div><img id="jumper" src="assets/luna.svg" alt="" aria-hidden="true"></div>
-        <div class="movement-controls"><button id="move-left" aria-label="Move left">←</button><button id="jump-button">Jump! 🐾</button><button id="move-right" aria-label="Move right">→</button></div>
+        <p class="jump-instruction">← → Move · ↑ Jump</p>
+        <div id="jump-arena" tabindex="0" aria-label="Use left and right arrow keys to move. Up arrow to jump."><div id="answer-choices" role="group" aria-label="Answer choices"></div><img id="jumper" src="assets/luna.svg" alt="" aria-hidden="true"></div>
+        <div class="movement-controls"><button id="move-left" aria-label="Move left">←</button><button id="jump-button">↑ Jump</button><button id="move-right" aria-label="Move right">→</button></div>
         <button id="hint-button" class="hint-button">💡 Hint</button><div id="hint" hidden></div></div>
         <div id="feedback" role="status" aria-live="polite">You’ve got this! Let’s collect your first star.</div>
         <div id="celebration" hidden><div class="celebration-icon">🏆🦄🐶</div><h2>You’re a star!</h2><p>10 stars! Hooray! 🎉</p><button class="primary" id="again">Play again ✨</button></div>

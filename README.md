@@ -24,6 +24,8 @@ GitHub Pages serves `index.html` directly; no build command is required.
 
 ## 3D controls
 
-Choose Luna or Pip. Use **Left / Right arrows** to move between answer gates and **Space / Enter** to jump. Touch users can use the arrow and Jump buttons, or tap an answer directly. Correct jumps advance automatically.
+Choose Luna or Pip. Use **Left / Right arrows** to move between answer gates and **Up arrow (↑)** to jump (Space / Enter also work). Touch users can use the arrow and Jump buttons, or tap an answer directly. Correct jumps advance automatically.
+
+The 3D meadow fills the browser viewport, with floating question and touch controls. Animals have soft shadows, detailed coats and animated legs.
 
 The meadow and animals use local Three.js 0.180.0 (MIT; license in `vendor/THREE-LICENSE.txt`). No build or CDN is required. A WebGL-capable browser shows the 3D models; browsers without WebGL retain the illustrated jumping game. Serve over HTTP rather than opening the HTML file directly, because the 3D code uses JavaScript modules.
