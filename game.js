@@ -1,5 +1,5 @@
 import {activities, createQuestions} from './maths.js';
-import {createMeadow} from './meadow.js?v=glitter1';
+import {createMeadow} from './meadow.js?v=glitter2';
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -147,6 +147,8 @@ import {createMeadow} from './meadow.js?v=glitter1';
     }));
   }
   function question() {
+    document.body.classList.remove('showing-result');
+    document.querySelector('.question-mark').textContent = '?';
     roundVersion++; clearTimeout(advanceTimer); flight?.cancel(); meadow?.reset(); jumping = false;
     if (!bag.length) makeBag();
     current = bag.pop(); ({first, second} = current); previous = JSON.stringify(current); solved = false;
@@ -167,14 +169,16 @@ import {createMeadow} from './meadow.js?v=glitter1';
     question();
   }
   function awardStar() {
+    document.body.classList.add('showing-result');
+    document.querySelector('.question-mark').textContent = current.answer;
     if(meadow) meadow.celebrate();
     else {
       const avatar=$('jumper').getBoundingClientRect(),arena=$('jump-arena').getBoundingClientRect();
       const glitter=document.createElement('div');glitter.className='fallback-glitter';glitter.setAttribute('aria-hidden','true');
       glitter.style.left=`${avatar.left-arena.left+avatar.width*(chosenFriend==='luna'?.7:.2)}px`;
       glitter.style.top=`${avatar.top-arena.top+avatar.height*.2}px`;
-      for(let i=0;i<16;i++){const spark=document.createElement('span');spark.textContent='✦';const angle=i*Math.PI/8;spark.style.setProperty('--gx',`${Math.cos(angle)*95}px`);spark.style.setProperty('--gy',`${Math.sin(angle)*95}px`);spark.style.color=['#d677ff','#ed9a00','#ec50b7'][i%3];glitter.append(spark)}
-      $('jump-arena').append(glitter);setTimeout(()=>glitter.remove(),1500);
+      for(let i=0;i<36;i++){const spark=document.createElement('span');spark.textContent='✦';const angle=i*Math.PI/18;spark.style.setProperty('--gx',`${Math.cos(angle)*180}px`);spark.style.setProperty('--gy',`${Math.sin(angle)*180}px`);spark.style.color=['#d677ff','#ed9a00','#ec50b7'][i%3];glitter.append(spark)}
+      $('jump-arena').append(glitter);setTimeout(()=>glitter.remove(),2500);
     }
     solved = true; stars++; progress();
     animate('luna', 'dance'); animate('pip', 'dance'); magic(['⭐', '✨', '💖']);
@@ -188,10 +192,10 @@ import {createMeadow} from './meadow.js?v=glitter1';
       document.querySelector('.scene').classList.add('party');
       $('cheer').textContent = '“You did it! Party time!”';
       $('question-area').hidden = true; $('celebration').hidden = false; $('again').focus();
-      },1600);
+      },2600);
     } else {
       const version = roundVersion;
-      advanceTimer = setTimeout(() => { if (version === roundVersion) question(); }, 1600);
+      advanceTimer = setTimeout(() => { if (version === roundVersion) question(); }, 2600);
     }
   }
   $('hint-button').addEventListener('click', () => {

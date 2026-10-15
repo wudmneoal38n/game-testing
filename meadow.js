@@ -64,32 +64,33 @@ export function createMeadow(host) {
   function clearGlitter(){if(!glitter)return;scene.remove(glitter.points);glitter.points.geometry.dispose();glitter.points.material.dispose();glitter=null;}
   function celebrate(){
     clearGlitter();
+    rings.forEach(ring=>ring.visible=false);
     active.updateWorldMatrix(true,true);
     const origin=active.userData.glitterSource.getWorldPosition(new THREE.Vector3());
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const count=reduced?28:110,positions=new Float32Array(count*3),colors=new Float32Array(count*3),velocities=[];
-    const palette=['#ffd447','#ff7cde','#b98cff','#79e8ff','#ffffff'];
+    const count=reduced?40:340,positions=new Float32Array(count*3),colors=new Float32Array(count*3),velocities=[];
+    const palette=['#ffbf00','#ff239e','#9136ed','#00b8d9','#ffffff'];
     for(let i=0;i<count;i++){
       positions.set(origin.toArray(),i*3);
       const color=new THREE.Color(palette[i%palette.length]);colors.set(color.toArray(),i*3);
-      const angle=Math.random()*Math.PI*2,speed=.7+Math.random()*2.2;
-      velocities.push(new THREE.Vector3(Math.cos(angle)*speed,1+Math.random()*2.5,Math.sin(angle)*speed));
+      const angle=Math.random()*Math.PI*2,speed=1.5+Math.random()*3.5;
+      velocities.push(new THREE.Vector3(Math.cos(angle)*speed,1.8+Math.random()*3.5,Math.sin(angle)*speed));
     }
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-    const material=new THREE.PointsMaterial({size:.3,map:sparkleTexture,vertexColors:true,transparent:true,depthWrite:false,toneMapped:false,blending:THREE.NormalBlending});
+    const material=new THREE.PointsMaterial({size:.55,map:sparkleTexture,vertexColors:true,transparent:true,depthWrite:false,fog:false,toneMapped:false,blending:THREE.NormalBlending});
     const points=new THREE.Points(geometry,material);points.frustumCulled=false;scene.add(points);
     glitter={points,origin,velocities,start:performance.now(),reduced};
   }
-  function reset(){clearGlitter();flight?.resolve();flight=null;active.rotation.set(0,0,0);active.userData.legs.forEach(leg=>leg.rotation.x=0);active.position.set((lane-1)*2.5,0,3);}
+  function reset(){clearGlitter();rings.forEach(ring=>ring.visible=true);flight?.resolve();flight=null;active.rotation.set(0,0,0);active.userData.legs.forEach(leg=>leg.rotation.x=0);active.position.set((lane-1)*2.5,0,3);}
   function frame(time){const dt=Math.min((time-lastTime)/1000,.05);lastTime=time;
     if(flight){const t=Math.min((time-flight.start)/(matchMedia('(prefers-reduced-motion: reduce)').matches?350:1400),1);active.position.set((flight.lane-1)*2.5,Math.sin(t*Math.PI)*1.15,3-5*t);active.rotation.x=-Math.sin(t*Math.PI)*.22;active.userData.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(t*Math.PI)*(i<2?-.65:.75));if(t===1){const done=flight.resolve;flight=null;active.rotation.x=0;done();}}
     else {const distance=(lane-1)*2.5-active.position.x;active.position.x+=distance*Math.min(1,dt*9);active.rotation.z=-Math.max(-.1,Math.min(.1,distance*.09));active.userData.legs.forEach((leg,i)=>leg.rotation.x=Math.abs(distance)>.03?Math.sin(time*.014+i*Math.PI)*.35:0);}
     if(glitter){
       const age=(time-glitter.start)/1000;
-      if(age>1.45)clearGlitter();
+      if(age>2.4)clearGlitter();
       else{const positions=glitter.points.geometry.attributes.position;
         glitter.velocities.forEach((velocity,i)=>{const t=glitter.reduced?age*.15:age;positions.setXYZ(i,glitter.origin.x+velocity.x*t,glitter.origin.y+velocity.y*t-1.5*t*t,glitter.origin.z+velocity.z*t)});
-        positions.needsUpdate=true;glitter.points.material.opacity=Math.max(0,1-age/1.45);
+        positions.needsUpdate=true;glitter.points.material.opacity=Math.min(1,Math.max(0,(2.4-age)/.7));
       }
     }
     const w=host.clientWidth,h=host.clientHeight;
