@@ -1,5 +1,5 @@
 import {activities, createQuestions} from './maths.js';
-import {createMeadow} from './meadow.js?v=fullscreen1';
+import {createMeadow} from './meadow.js?v=glitter1';
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -167,18 +167,31 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
     question();
   }
   function awardStar() {
+    if(meadow) meadow.celebrate();
+    else {
+      const avatar=$('jumper').getBoundingClientRect(),arena=$('jump-arena').getBoundingClientRect();
+      const glitter=document.createElement('div');glitter.className='fallback-glitter';glitter.setAttribute('aria-hidden','true');
+      glitter.style.left=`${avatar.left-arena.left+avatar.width*(chosenFriend==='luna'?.7:.2)}px`;
+      glitter.style.top=`${avatar.top-arena.top+avatar.height*.2}px`;
+      for(let i=0;i<16;i++){const spark=document.createElement('span');spark.textContent='✦';const angle=i*Math.PI/8;spark.style.setProperty('--gx',`${Math.cos(angle)*95}px`);spark.style.setProperty('--gy',`${Math.sin(angle)*95}px`);spark.style.color=['#d677ff','#ed9a00','#ec50b7'][i%3];glitter.append(spark)}
+      $('jump-arena').append(glitter);setTimeout(()=>glitter.remove(),1500);
+    }
     solved = true; stars++; progress();
     animate('luna', 'dance'); animate('pip', 'dance'); magic(['⭐', '✨', '💖']);
     $('hint-button').hidden = true; $('hint').hidden = true;
     $('feedback').textContent = `Yes! ${first} ${current.operator} ${second} = ${current.answer} ⭐`;
     $('feedback').className = 'success'; $('cheer').textContent = cheers[(stars - 1) % cheers.length];
     if (stars === 10) {
+      const version=roundVersion;
+      advanceTimer=setTimeout(()=>{
+      if(version!==roundVersion)return;
       document.querySelector('.scene').classList.add('party');
       $('cheer').textContent = '“You did it! Party time!”';
       $('question-area').hidden = true; $('celebration').hidden = false; $('again').focus();
+      },1600);
     } else {
       const version = roundVersion;
-      advanceTimer = setTimeout(() => { if (version === roundVersion) question(); }, 1000);
+      advanceTimer = setTimeout(() => { if (version === roundVersion) question(); }, 1600);
     }
   }
   $('hint-button').addEventListener('click', () => {

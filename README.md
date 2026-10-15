@@ -215,3 +215,5 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
   }));
   openMenu();
 })();
+
+Correct answers trigger a rainbow glitter burst from Luna’s horn or Pip’s tail. The next question waits for the burst to finish, including before the final trophy. Reduced-motion settings use a gentle shimmer instead.

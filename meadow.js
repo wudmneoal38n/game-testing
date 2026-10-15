@@ -44,15 +44,54 @@ export function createMeadow(host) {
       for(let i=0;i<16;i++){const strand=ball(g,['#e7bdd5','#c5b1d5','#e9d2ea'][i%3],Math.sin(i)*.07,1.57-i*.055,.06+i*.025,.065,.14,.075);strand.rotation.z=Math.sin(i)*.3}
       for(let i=0;i<8;i++)ball(g,'#dfbdd9',Math.sin(i)*.08,.83-i*.045,.76+i*.025,.06,.19,.07);
     }
+    const glitterSource=new THREE.Object3D();
+    glitterSource.position.set(dog?.08:0,dog?1.18:2.14,dog?.65:-.49);
+    g.add(glitterSource);g.userData.glitterSource=glitterSource;
     // Legs bend during the leap and step as the animal moves between lanes.
     return g;
   }
   const luna=animal(false),pip=animal(true);scene.add(luna,pip);pip.visible=false;
   let active=luna,lane=1,flight=null,lastTime=0;
-  function reset(){flight?.resolve();flight=null;active.rotation.set(0,0,0);active.userData.legs.forEach(leg=>leg.rotation.x=0);active.position.set((lane-1)*2.5,0,3);}
+  const sparkleCanvas=document.createElement('canvas');sparkleCanvas.width=64;sparkleCanvas.height=64;
+  const sparkleContext=sparkleCanvas.getContext('2d');
+  const glow=sparkleContext.createRadialGradient(32,32,0,32,32,32);
+  glow.addColorStop(0,'#ffffffff');glow.addColorStop(.18,'#ffffffee');glow.addColorStop(1,'#ffffff00');
+  sparkleContext.fillStyle=glow;sparkleContext.fillRect(0,0,64,64);
+  sparkleContext.fillStyle='white';sparkleContext.beginPath();
+  sparkleContext.moveTo(32,3);sparkleContext.lineTo(38,26);sparkleContext.lineTo(61,32);sparkleContext.lineTo(38,38);sparkleContext.lineTo(32,61);sparkleContext.lineTo(26,38);sparkleContext.lineTo(3,32);sparkleContext.lineTo(26,26);sparkleContext.closePath();sparkleContext.fill();
+  const sparkleTexture=new THREE.CanvasTexture(sparkleCanvas);
+  let glitter=null;
+  function clearGlitter(){if(!glitter)return;scene.remove(glitter.points);glitter.points.geometry.dispose();glitter.points.material.dispose();glitter=null;}
+  function celebrate(){
+    clearGlitter();
+    active.updateWorldMatrix(true,true);
+    const origin=active.userData.glitterSource.getWorldPosition(new THREE.Vector3());
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const count=reduced?28:110,positions=new Float32Array(count*3),colors=new Float32Array(count*3),velocities=[];
+    const palette=['#ffd447','#ff7cde','#b98cff','#79e8ff','#ffffff'];
+    for(let i=0;i<count;i++){
+      positions.set(origin.toArray(),i*3);
+      const color=new THREE.Color(palette[i%palette.length]);colors.set(color.toArray(),i*3);
+      const angle=Math.random()*Math.PI*2,speed=.7+Math.random()*2.2;
+      velocities.push(new THREE.Vector3(Math.cos(angle)*speed,1+Math.random()*2.5,Math.sin(angle)*speed));
+    }
+    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+    const material=new THREE.PointsMaterial({size:.3,map:sparkleTexture,vertexColors:true,transparent:true,depthWrite:false,toneMapped:false,blending:THREE.NormalBlending});
+    const points=new THREE.Points(geometry,material);points.frustumCulled=false;scene.add(points);
+    glitter={points,origin,velocities,start:performance.now(),reduced};
+  }
+  function reset(){clearGlitter();flight?.resolve();flight=null;active.rotation.set(0,0,0);active.userData.legs.forEach(leg=>leg.rotation.x=0);active.position.set((lane-1)*2.5,0,3);}
   function frame(time){const dt=Math.min((time-lastTime)/1000,.05);lastTime=time;
     if(flight){const t=Math.min((time-flight.start)/(matchMedia('(prefers-reduced-motion: reduce)').matches?350:1400),1);active.position.set((flight.lane-1)*2.5,Math.sin(t*Math.PI)*1.15,3-5*t);active.rotation.x=-Math.sin(t*Math.PI)*.22;active.userData.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(t*Math.PI)*(i<2?-.65:.75));if(t===1){const done=flight.resolve;flight=null;active.rotation.x=0;done();}}
     else {const distance=(lane-1)*2.5-active.position.x;active.position.x+=distance*Math.min(1,dt*9);active.rotation.z=-Math.max(-.1,Math.min(.1,distance*.09));active.userData.legs.forEach((leg,i)=>leg.rotation.x=Math.abs(distance)>.03?Math.sin(time*.014+i*Math.PI)*.35:0);}
+    if(glitter){
+      const age=(time-glitter.start)/1000;
+      if(age>1.45)clearGlitter();
+      else{const positions=glitter.points.geometry.attributes.position;
+        glitter.velocities.forEach((velocity,i)=>{const t=glitter.reduced?age*.15:age;positions.setXYZ(i,glitter.origin.x+velocity.x*t,glitter.origin.y+velocity.y*t-1.5*t*t,glitter.origin.z+velocity.z*t)});
+        positions.needsUpdate=true;glitter.points.material.opacity=Math.max(0,1-age/1.45);
+      }
+    }
     const w=host.clientWidth,h=host.clientHeight;
     host.querySelectorAll('.answer-hoop').forEach((label,i)=>{const point=rings[i].position.clone().project(camera);label.style.left=`${(point.x+1)*w/2}px`;label.style.top=`${(1-point.y)*h/2}px`});
     renderer.render(scene,camera);
@@ -61,5 +100,5 @@ export function createMeadow(host) {
   new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=camera.aspect<.8?55:43;const distance=Math.max(10,4.4/(Math.tan(camera.fov*Math.PI/360)*camera.aspect));camera.position.set(.3,4.2,distance);camera.lookAt(0,.8,0);camera.updateProjectionMatrix();camera.updateMatrixWorld();
     const labels=host.querySelectorAll('.answer-hoop');
     rings.forEach((ring,i)=>{const point=ring.position.clone().project(camera);if(labels[i]){labels[i].style.left=`${(point.x+1)*w/2}px`;labels[i].style.top=`${(1-point.y)*h/2}px`}})}).observe(host);
-  return {select(name){reset();active.visible=false;active=name==='pip'?pip:luna;active.visible=true;reset()},lane(i){lane=i;rings.forEach((r,j)=>r.material.emissive.set(j===i?'#493019':'#000000'))},reset,jump(i){reset();lane=i;return new Promise(resolve=>{flight={lane:i,start:performance.now(),resolve}})}};
+  return {celebrate,select(name){reset();active.visible=false;active=name==='pip'?pip:luna;active.visible=true;reset()},lane(i){lane=i;rings.forEach((r,j)=>r.material.emissive.set(j===i?'#493019':'#000000'))},reset,jump(i){reset();lane=i;return new Promise(resolve=>{flight={lane:i,start:performance.now(),resolve}})}};
 }
