@@ -1,15 +1,34 @@
+import {createMeadow} from './meadow.js';
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   let stars = 0, first = 2, second = 3, solved = false, bag = [], previous = '';
   const cheers = ['“A sparkling star! You did it!”', '“Pip is doing a happy tail wag!”', '“Your brain is getting stronger!”', '“High hoof! That was magical!”'];
   const timers = new Map();
+  const meadow = createMeadow($('jump-arena'));
+  if (meadow) $('jump-arena').classList.add('three-d');
+  let lane = 1;
+  function selectLane(index) {
+    lane = Math.max(0, Math.min(2,index));
+    meadow?.lane(lane);
+    document.querySelectorAll('.answer-hoop').forEach((button,i)=>button.classList.toggle('active-lane',i===lane));
+  }
+  function move(direction) { if (!jumping && !solved) selectLane(lane+direction); }
+  function jumpSelected() { document.querySelectorAll('.answer-hoop')[lane]?.click(); }
+  $('move-left').addEventListener('click',()=>move(-1));
+  $('move-right').addEventListener('click',()=>move(1));
+  $('jump-button').addEventListener('click',jumpSelected);
+  document.addEventListener('keydown',event=>{
+    if ($('question-area').hidden || event.target.tagName === 'SELECT' || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key==='ArrowLeft' || event.key==='ArrowRight') {event.preventDefault();move(event.key==='ArrowLeft'?-1:1);}
+    if ((event.code==='Space'||event.key==='Enter') && (event.target===document.body || event.target.closest('#jump-arena, .movement-controls'))) {event.preventDefault();if(!event.repeat)jumpSelected();}
+  });
   let chosenFriend = 'luna', jumping = false, roundVersion = 0;
   let flight, advanceTimer;
   for (const name of ['luna', 'pip']) {
     $('choose-' + name).addEventListener('click', () => {
       if (jumping) return;
-      chosenFriend = name;
+      chosenFriend = name; meadow?.select(name);
       $('jumper').src = `assets/${name}.svg`;
       for (const other of ['luna', 'pip']) $('choose-' + other).setAttribute('aria-pressed', String(other === name));
     });
@@ -30,10 +49,12 @@
       button.addEventListener('click', () => jumpAnswer(value, button));
       return button;
     }));
+    selectLane(1);
   }
   async function jumpAnswer(value, button) {
     if (solved || jumping) return;
     flight?.cancel();
+    selectLane([...document.querySelectorAll('.answer-hoop')].indexOf(button));
     jumping = true;
     const version = roundVersion;
     const buttons = [...document.querySelectorAll('.answer-hoop')];
@@ -45,6 +66,9 @@
     button.classList.add('selected');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     $('feedback').textContent = `${chosenFriend === 'luna' ? 'Luna' : 'Pip'} is jumping through ${value}!`;
+    if (meadow) {
+      await meadow.jump(lane);
+    } else {
     flight = avatar.animate([
       {transform:'translate(0,0) scale(1)'},
       {transform:`translate(${x * .4}px, ${y - 8}px) scale(1.1)`,offset:.3},
@@ -53,9 +77,11 @@
       {transform:`translate(${x}px, 0px) scale(1)`,offset:1}
     ], {duration:reduced?350:1800, easing:'ease-in-out',fill:'forwards'});
     try { await flight.finished; } catch { return; }
+    }
     if (version !== roundVersion) return;
     jumping = false;
     if (value !== first * second) {
+      meadow?.reset();
       button.classList.add('miss'); button.disabled = true;
       buttons.filter(choice => !choice.classList.contains('miss')).forEach(choice => choice.disabled = false);
       animate(chosenFriend, 'nuzzle');
@@ -122,7 +148,7 @@
     }));
   }
   function question() {
-    roundVersion++; clearTimeout(advanceTimer); flight?.cancel(); jumping = false;
+    roundVersion++; clearTimeout(advanceTimer); flight?.cancel(); meadow?.reset(); jumping = false;
     if (!bag.length) makeBag();
     [first, second] = bag.pop(); previous = `${first},${second}`; solved = false;
     $('first').textContent = first; $('second').textContent = second;

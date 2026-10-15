@@ -2,7 +2,7 @@
 
 A gentle multiplication game for children, with Luna the unicorn and Pip the fluffy pup. Practise single digit multiplication (1–9), choose a times table, pick Luna or Pip, and tap one of three answer hoops to make your friend jump through it. After each correct jump, the next question appears automatically. Use groups-of-dots hints and collect ten stars. Incorrect answers can be retried without a penalty or timer.
 
-Open `index.html` in a browser, or serve the folder:
+Serve the folder locally:
 
 ```sh
 cd /workspace/game-testing
@@ -21,3 +21,9 @@ The game lives on the `main` branch. To host it with GitHub Pages:
 4. Wait for the Pages deployment to complete and open the site link shown there.
 
 GitHub Pages serves `index.html` directly; no build command is required.
+
+## 3D controls
+
+Choose Luna or Pip. Use **Left / Right arrows** to move between answer gates and **Space / Enter** to jump. Touch users can use the arrow and Jump buttons, or tap an answer directly. Correct jumps advance automatically.
+
+The meadow and animals use local Three.js 0.180.0 (MIT; license in `vendor/THREE-LICENSE.txt`). No build or CDN is required. A WebGL-capable browser shows the 3D models; browsers without WebGL retain the illustrated jumping game. Serve over HTTP rather than opening the HTML file directly, because the 3D code uses JavaScript modules.
