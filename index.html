@@ -4,21 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#faf5ff">
-  <title>Rainbow Meadow · Multiplication magic</title>
-  <link rel="stylesheet" href="style.css?v=fullscreen1">
-  <script type="module" src="game.js?v=fullscreen1"></script>
+  <title>Rainbow Meadow · Maths magic</title>
+  <link rel="stylesheet" href="style.css?v=activities1">
+  <script type="module" src="game.js?v=activities1"></script>
 </head>
 <body>
+  <section id="start-screen" aria-labelledby="start-title">
+    <div class="activity-card"><div class="activity-friends">🦄 🌈 🐶</div><h1 id="start-title">Pick your adventure!</h1><p>What shall we practise?</p>
+    <div class="activity-grid">
+      <button data-mode="addition"><span>+</span>Addition</button>
+      <button data-mode="subtraction"><span>−</span>Subtraction</button>
+      <button data-mode="multiplication"><span>×</span>Multiplication</button>
+      <button data-mode="division"><span>÷</span>Division</button>
+      <button data-mode="fractions"><span>½</span>Fractions<small>Fractions of a number</small></button>
+    </div><p class="activity-note">← → Move · ↑ Jump · Collect 10 stars!</p></div>
+  </section>
   <header><a class="brand" href="index.html"><span>🌈</span> Rainbow Meadow</a><span class="header-note">A little practice. A lot of magic.</span></header>
   <main>
-    <div class="intro"><span class="eyebrow">✨ MULTIPLICATION MAGIC</span><h1><span>Let’s make magic!</span></h1><p>Multiply. Collect stars. Make friends! 🦄 🐶</p></div>
+    <div class="intro"><span class="eyebrow">✨ MATHS MAGIC</span><h1><span>Let’s make magic!</span></h1><p>Multiply. Collect stars. Make friends! 🦄 🐶</p></div>
     <section class="game-layout" aria-label="Multiplication game">
       <aside class="friends-card"><div class="scene"><span class="cloud cloud-one">☁</span><span class="cloud cloud-two">☁</span><span class="sparkle s1">✦</span><span class="sparkle s2">✧</span><div class="rainbow">🌈</div><div class="friends"><button id="luna" class="friend" aria-label="Give Luna a magical high five">🦄</button><button id="pip" class="friend" aria-label="Pet Pip the fluffy puppy">🐶</button></div><div id="magic" aria-hidden="true"></div><div class="flowers">🌼 🌿 🌸 🌿 🌼</div></div><div class="friends-copy"><span class="eyebrow">YOUR MAGIC FRIENDS</span><h2>Luna &amp; Pip</h2><div class="pet-actions"><button id="high-five">🦄 High five</button><button id="pet">🐾 Pet Pip</button></div><p id="cheer" role="status" aria-live="polite">“Let’s play!”</p></div><div class="tip"><span>💜</span><p>Take your time. Every try helps your brain grow!</p></div></aside>
       <div class="play-card">
-        <div class="card-top"><span class="pill">⭐ <span id="star-count">0</span> stars</span><button class="text-button" id="restart">Restart ↻</button></div>
-        <div class="settings"><label for="table">Let’s practise</label><select id="table"><option value="mixed">All tables · 1–9</option><option value="2">2 times table</option><option value="3">3 times table</option><option value="4">4 times table</option><option value="5">5 times table</option><option value="6">6 times table</option><option value="7">7 times table</option><option value="8">8 times table</option><option value="9">9 times table</option><option value="1">1 times table</option></select></div>
+        <div class="card-top"><span class="pill">⭐ <span id="star-count">0</span> stars</span><button class="text-button" id="restart">Restart ↻</button><button id="change-activity" class="text-button">Change game</button></div>
+        <div class="settings"><span id="activity-name">Multiplication</span><label class="sr-only" for="table">Times table</label><select id="table"><option value="mixed">All tables · 1–9</option><option value="2">2 times table</option><option value="3">3 times table</option><option value="4">4 times table</option><option value="5">5 times table</option><option value="6">6 times table</option><option value="7">7 times table</option><option value="8">8 times table</option><option value="9">9 times table</option><option value="1">1 times table</option></select></div>
         <div class="progress-label"><span>Your star trail</span><span id="progress-text">0 / 10</span></div><div class="trail" id="trail" aria-label="0 of 10 stars"></div>
-        <div id="question-area"><p class="question-label">✨ YOUR TURN!</p><div class="equation"><span id="first">2</span><span class="operator">×</span><span id="second">3</span><span class="operator">=</span><span class="question-mark">?</span></div>
+        <div id="question-area"><p class="question-label">✨ YOUR TURN!</p><div class="equation"><span id="first">2</span><span class="operator" id="math-operator">×</span><span id="second">3</span><span class="operator">=</span><span class="question-mark">?</span></div>
         <div class="jumper-picker" role="group" aria-label="Choose your jumping friend"><button id="choose-luna" aria-pressed="true">🦄 Luna</button><button id="choose-pip" aria-pressed="false">🐶 Pip</button></div>
         <p class="jump-instruction">← → Move · ↑ Jump</p>
         <div id="jump-arena" tabindex="0" aria-label="Use left and right arrow keys to move. Up arrow to jump."><div id="answer-choices" role="group" aria-label="Answer choices"></div><img id="jumper" src="assets/luna.svg" alt="" aria-hidden="true"></div>

@@ -1,8 +1,10 @@
+import {activities, createQuestions} from './maths.js';
 import {createMeadow} from './meadow.js?v=fullscreen1';
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   let stars = 0, first = 2, second = 3, solved = false, bag = [], previous = '';
+  let mode = 'multiplication', current;
   const cheers = ['“A sparkling star! You did it!”', '“Pip is doing a happy tail wag!”', '“Your brain is getting stronger!”', '“High hoof! That was magical!”'];
   const timers = new Map();
   const meadow = createMeadow($('jump-arena'));
@@ -19,7 +21,7 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
   $('move-right').addEventListener('click',()=>move(1));
   $('jump-button').addEventListener('click',jumpSelected);
   document.addEventListener('keydown',event=>{
-    if ($('question-area').hidden || event.target.tagName === 'SELECT' || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (!$('start-screen').hidden || $('question-area').hidden || event.target.tagName === 'SELECT' || event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.key==='ArrowLeft' || event.key==='ArrowRight') {event.preventDefault();move(event.key==='ArrowLeft'?-1:1);}
     if (event.key==='ArrowUp') {event.preventDefault();if(!event.repeat)jumpSelected();}
     if ((event.code==='Space'||event.key==='Enter') && (event.target===document.body || event.target.closest('#jump-arena, .movement-controls'))) {event.preventDefault();if(!event.repeat)jumpSelected();}
@@ -35,9 +37,9 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
     });
   }
   function choices() {
-    const correct = first * second;
+    const correct = current.answer;
     const values = new Set([correct]);
-    while (values.size < 3) values.add(1 + Math.floor(Math.random() * 81));
+    while (values.size < 3) values.add(1 + Math.floor(Math.random() * (mode === 'multiplication' ? 81 : 30)));
     const answers = [...values];
     for (let i = answers.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -81,7 +83,7 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
     }
     if (version !== roundVersion) return;
     jumping = false;
-    if (value !== first * second) {
+    if (value !== current.answer) {
       meadow?.reset();
       button.classList.add('miss'); button.disabled = true;
       buttons.filter(choice => !choice.classList.contains('miss')).forEach(choice => choice.disabled = false);
@@ -127,16 +129,12 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
   $('pip').addEventListener('click', petPip);
   $('pet').addEventListener('click', petPip);
   function makeBag() {
-    const selected = $('table').value;
-    bag = [];
-    for (let a = 1; a <= 9; a++) for (let b = 1; b <= 9; b++) {
-      if (selected === 'mixed' || a === Number(selected)) bag.push([a, b]);
-    }
+    bag = createQuestions(mode, $('table').value);
     for (let i = bag.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [bag[i], bag[j]] = [bag[j], bag[i]];
     }
-    if (bag.length > 1 && bag[bag.length - 1].join(',') === previous) [bag[0], bag[bag.length - 1]] = [bag[bag.length - 1], bag[0]];
+    if (bag.length > 1 && JSON.stringify(bag[bag.length - 1]) === previous) [bag[0], bag[bag.length - 1]] = [bag[bag.length - 1], bag[0]];
   }
   function progress() {
     $('star-count').textContent = stars;
@@ -151,7 +149,9 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
   function question() {
     roundVersion++; clearTimeout(advanceTimer); flight?.cancel(); meadow?.reset(); jumping = false;
     if (!bag.length) makeBag();
-    [first, second] = bag.pop(); previous = `${first},${second}`; solved = false;
+    current = bag.pop(); ({first, second} = current); previous = JSON.stringify(current); solved = false;
+    $('math-operator').textContent = current.operator;
+    document.querySelector('.equation').classList.toggle('fraction-question', mode === 'fractions');
     $('first').textContent = first; $('second').textContent = second;
     choices();
     $('hint').hidden = true; $('hint-button').hidden = false;
@@ -170,7 +170,7 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
     solved = true; stars++; progress();
     animate('luna', 'dance'); animate('pip', 'dance'); magic(['⭐', '✨', '💖']);
     $('hint-button').hidden = true; $('hint').hidden = true;
-    $('feedback').textContent = `Yes! ${first} × ${second} = ${first * second}. A star for you! ⭐`;
+    $('feedback').textContent = `Yes! ${first} ${current.operator} ${second} = ${current.answer} ⭐`;
     $('feedback').className = 'success'; $('cheer').textContent = cheers[(stars - 1) % cheers.length];
     if (stars === 10) {
       document.querySelector('.scene').classList.add('party');
@@ -186,9 +186,9 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
     if (hint.hidden) return;
     hint.replaceChildren();
     const text = document.createElement('div');
-    text.textContent = `${first} groups of ${second}. Count the dots!`;
+    text.textContent = current.hint;
     const groups = document.createElement('div'); groups.className = 'groups'; groups.setAttribute('aria-hidden','true');
-    for (let i = 0; i < first; i++) {
+    for (let i = 0; mode === 'multiplication' && i < first; i++) {
       const group = document.createElement('span'); group.className = 'group'; group.textContent = '●'.repeat(second); groups.append(group);
     }
     hint.append(text, groups);
@@ -196,5 +196,22 @@ import {createMeadow} from './meadow.js?v=fullscreen1';
   $('restart').addEventListener('click', reset);
   $('again').addEventListener('click', reset);
   $('table').addEventListener('change', () => { bag = []; if (stars === 10) reset(); else question(); });
-  reset();
+  function openMenu() {
+    roundVersion++; clearTimeout(advanceTimer); flight?.cancel(); meadow?.reset(); jumping = false;
+    $('start-screen').hidden = false;
+    document.querySelector('main').inert = true;
+    document.querySelector('header').inert = true;
+    document.querySelector(`[data-mode="${mode}"]`).focus();
+  }
+  $('change-activity').addEventListener('click', openMenu);
+  document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
+    mode = button.dataset.mode;
+    $('activity-name').textContent = activities[mode].name;
+    $('table').hidden = mode !== 'multiplication';
+    $('start-screen').hidden = true;
+    document.querySelector('main').inert = false;
+    document.querySelector('header').inert = false;
+    reset();
+  }));
+  openMenu();
 })();
